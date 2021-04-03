@@ -7,6 +7,6 @@ RUN go get github.com/google/go-licenses && go-licenses save ./... --save_path=/
 FROM gcr.io/distroless/static:nonroot
 LABEL org.opencontainers.image.source="https://github.com/greboid/docker-tags-action"
 COPY --from=build /notices /notices
-COPY --from=builder /app/main /docker-tags
+COPY --from=build /app/main /docker-tags
 WORKDIR /
 ENTRYPOINT ["/docker-tags"]
