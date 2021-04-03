@@ -16,9 +16,6 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       
-      - name: Log into registry (docker hub)
-        run: echo "${{ secrets.DOCKER_HUB_TOKEN }}" | docker login -u "${{ secrets.DOCKER_HUB_USER }}" --password-stdin
-      
       - name: Build image
         run: docker build . --tag $IMAGE_NAME
           
