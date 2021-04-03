@@ -2,25 +2,28 @@ package main
 
 import (
 	"fmt"
-	"github.com/blang/semver/v4"
 	"os"
 	"strings"
+
+	"github.com/blang/semver/v4"
 )
 
 func main() {
-	fmt.Printf("Getting environmental variables\n")
-	imageName := getImageName(os.Getenv("GITHUB_REPOSITORY"), os.Getenv("INPUT_REPOSITORY"))
-	ref := os.Getenv("GITHUB_REF")
-	fmt.Printf("Parsing registries\n")
-	registries := parseRegistriesInput(os.Getenv("INPUT_REGISTRIES"))
-	fmt.Printf("Getting versions\n")
-	versions := refToVersions(ref)
-	fmt.Printf("Getting tags\n")
-	tags := getTags(imageName, registries, versions)
-	fmt.Printf("::set-output name=tags::%s", strings.Join(tags, ","))
+	fmt.Printf(getOutput(os.Getenv("GITHUB_REPOSITORY"),
+		os.Getenv("INPUT_REPOSITORY"),
+		os.Getenv("GITHUB_REF"),
+		os.Getenv("INPUT_REGISTRIES")))
 }
 
-func getTags(imageName string, registries []string, versions []string) (tags []string){
+func getOutput(gitRepo, inputRepo, gitRef, inputRegistries string) string {
+	imageName := getImageName(gitRepo, inputRepo)
+	registries := parseRegistriesInput(inputRegistries)
+	versions := refToVersions(gitRef)
+	tags := getTags(imageName, registries, versions)
+	return fmt.Sprintf("::set-output name=tags::%s", strings.Join(tags, ","))
+}
+
+func getTags(imageName string, registries []string, versions []string) (tags []string) {
 	for _, registry := range registries {
 		for _, version := range versions {
 			tags = append(tags, fmt.Sprintf("%s/%s:%s", registry, imageName, version))
@@ -67,7 +70,7 @@ func parseRegistriesInput(input string) []string {
 	return output
 }
 
-func getImageName(gitRepo string, inputRepo string) string{
+func getImageName(gitRepo string, inputRepo string) string {
 	if strings.TrimSpace(inputRepo) != "" {
 		return inputRepo
 	}

@@ -102,6 +102,11 @@ func Test_refToVersions(t *testing.T) {
 			input:        "refs/tags/v1.a",
 			wantVersions: nil,
 		},
+		{
+			name:         "invalid ref",
+			input:        "refs/heads/dev",
+			wantVersions: nil,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -124,8 +129,8 @@ func Test_getTags(t *testing.T) {
 		wantTags []string
 	}{
 		{
-			name:     "single registry",
-			args:     args{
+			name: "single registry",
+			args: args{
 				imageName:  "name",
 				registries: []string{"registry1"},
 				versions:   []string{"1.0.1"},
@@ -133,8 +138,8 @@ func Test_getTags(t *testing.T) {
 			wantTags: []string{"registry1/name:1.0.1"},
 		},
 		{
-			name:     "multiple registries",
-			args:     args{
+			name: "multiple registries",
+			args: args{
 				imageName:  "name",
 				registries: []string{"registry1", "registry2"},
 				versions:   []string{"1.0.1"},
@@ -142,8 +147,8 @@ func Test_getTags(t *testing.T) {
 			wantTags: []string{"registry1/name:1.0.1", "registry2/name:1.0.1"},
 		},
 		{
-			name:     "multiple versions",
-			args:     args{
+			name: "multiple versions",
+			args: args{
 				imageName:  "name",
 				registries: []string{"registry1"},
 				versions:   []string{"1.0.1", "latest"},
@@ -151,8 +156,8 @@ func Test_getTags(t *testing.T) {
 			wantTags: []string{"registry1/name:1.0.1", "registry1/name:latest"},
 		},
 		{
-			name:     "multiple both",
-			args:     args{
+			name: "multiple both",
+			args: args{
 				imageName:  "name",
 				registries: []string{"registry1", "registry2"},
 				versions:   []string{"1.0.1", "latest"},
@@ -208,6 +213,48 @@ func Test_getImageName(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := getImageName(tt.args.gitRepo, tt.args.inputRepo); got != tt.want {
 				t.Errorf("getImageName() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_getOutput(t *testing.T) {
+	type args struct {
+		gitRepo         string
+		inputRepo       string
+		gitRef          string
+		inputRegistries string
+	}
+	tests := []struct {
+		name string
+		args args
+		want string
+	}{
+		{
+			name: "valid input",
+			args: args{
+				gitRepo:         "group/test",
+				inputRepo:       "",
+				gitRef:          "refs/heads/master",
+				inputRegistries: "",
+			},
+			want: "::set-output name=tags::docker.io/group/test:latest",
+		},
+		{
+			name: "invalid input",
+			args: args{
+				gitRepo:         "group/test",
+				inputRepo:       "",
+				gitRef:          "refs/heads/dev",
+				inputRegistries: "",
+			},
+			want: "::set-output name=tags::",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := getOutput(tt.args.gitRepo, tt.args.inputRepo, tt.args.gitRef, tt.args.inputRegistries); got != tt.want {
+				t.Errorf("getOutput() = %v, want %v", got, tt.want)
 			}
 		})
 	}
