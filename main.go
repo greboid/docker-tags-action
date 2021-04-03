@@ -8,14 +8,14 @@ import (
 )
 
 func main() {
-	fmt.Printf("Getting environmental variables")
+	fmt.Printf("Getting environmental variables\n")
 	imageName := getImageName(os.Getenv("GITHUB_REPOSITORY"), os.Getenv("INPUT_REPOSITORY"))
 	ref := os.Getenv("GITHUB_REF")
-	fmt.Printf("Parsing registries")
+	fmt.Printf("Parsing registries\n")
 	registries := parseRegistriesInput(os.Getenv("INPUT_REGISTRIES"))
-	fmt.Printf("Getting versions")
+	fmt.Printf("Getting versions\n")
 	versions := refToVersions(ref)
-	fmt.Printf("Getting tags")
+	fmt.Printf("Getting tags\n")
 	tags := getTags(imageName, registries, versions)
 	fmt.Printf("::set-output name=tags::%s", strings.Join(tags, ","))
 }
