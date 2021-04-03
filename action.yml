@@ -1,4 +1,4 @@
-name: "Docker Tags Action"
+name: "Semver docker tags"
 author: "Greg Holmes"
 description: "Generates a list of docker tags for a given refspec"
 inputs:
