@@ -15,4 +15,4 @@ outputs:
     description: "All tags that should be set on a Docker image"
 runs:
   using: "docker"
-  image: "docker://ghcr.io/greboid/docker-tags-action:latest"
+  image: "docker://ghcr.io/greboid/docker-tags-action:1"
