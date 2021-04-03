@@ -17,7 +17,7 @@ func main() {
 	versions := refToVersions(ref)
 	fmt.Printf("Getting tags")
 	tags := getTags(imageName, registries, versions)
-	fmt.Printf("::set-output name=tags::%s" + strings.Join(tags, ","))
+	fmt.Printf("::set-output name=tags::%s", strings.Join(tags, ","))
 }
 
 func getTags(imageName string, registries []string, versions []string) (tags []string){
