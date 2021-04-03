@@ -1,0 +1,18 @@
+name: "Docker Tags Action"
+author: "Greg Holmes"
+description: "Generates a list of docker tags for a given refspec"
+inputs:
+  registries:
+    description: 'list of registries to push to, comma separated'
+    required: false
+    default: ''
+  repository:
+    description: 'name of the repository to push to, if different to the git repository name'
+    required: false
+    default: ''
+outputs:
+  tags:
+    description: "All tags that should be set on a Docker image"
+runs:
+  using: "docker"
+  image: "docker://ghcr.io/greboid/docker-tags-action:latest"
