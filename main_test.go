@@ -68,6 +68,11 @@ func Test_refToVersions(t *testing.T) {
 			wantVersions: []string{"1.0.0", "1.0", "1"},
 		},
 		{
+			name:         "v1.0.0.0.0.0",
+			input:        "refs/tags/v1.0.0.0.0.0",
+			wantVersions: nil,
+		},
+		{
 			name:         "1.0",
 			input:        "refs/tags/1.0",
 			wantVersions: nil,
@@ -223,6 +228,7 @@ func Test_getOutput(t *testing.T) {
 		gitRepo         string
 		inputRepo       string
 		gitRef          string
+		gitSHA          string
 		inputRegistries string
 	}
 	tests := []struct {
@@ -236,9 +242,10 @@ func Test_getOutput(t *testing.T) {
 				gitRepo:         "group/test",
 				inputRepo:       "",
 				gitRef:          "refs/heads/master",
+				gitSHA:          "abc123",
 				inputRegistries: "",
 			},
-			want: "::set-output name=tags::docker.io/group/test:latest",
+			want: "::set-output name=tags::docker.io/group/test:latest\n::set-output name=version::abc123",
 		},
 		{
 			name: "invalid input",
@@ -246,15 +253,124 @@ func Test_getOutput(t *testing.T) {
 				gitRepo:         "group/test",
 				inputRepo:       "",
 				gitRef:          "refs/heads/dev",
+				gitSHA:          "abc123",
 				inputRegistries: "",
 			},
-			want: "::set-output name=tags::",
+			want: "::set-output name=tags::\n::set-output name=version::unknown",
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := getOutput(tt.args.gitRepo, tt.args.inputRepo, tt.args.gitRef, tt.args.inputRegistries); got != tt.want {
+			if got := getOutput(tt.args.gitRepo, tt.args.inputRepo, tt.args.gitRef, tt.args.gitSHA, tt.args.inputRegistries); got != tt.want {
 				t.Errorf("getOutput() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_refToVersion(t *testing.T) {
+	type args struct {
+		ref string
+		sha string
+	}
+	tests := []struct {
+		name string
+		args args
+		want string
+	}{
+		{
+			name: "v1.0.0",
+			args: args{
+				ref: "refs/tags/v1.0.0",
+				sha: "abc123",
+			},
+			want: "1.0.0",
+		},
+		{
+			name: "1.0.0",
+			args: args{
+				ref: "refs/tags/1.0.0",
+				sha: "abc123",
+			},
+			want: "1.0.0",
+		},
+		{
+			name: "v1.0.0.0.0.0",
+			args: args{
+				ref: "refs/tags/v1.0.0.0.0.0",
+				sha: "abc123",
+			},
+			want: "unknown",
+		},
+		{
+			name: "1.0",
+			args: args{
+				ref: "refs/tags/1.0",
+				sha: "abc123",
+			},
+			want: "unknown",
+		},
+		{
+			name: "v1.0",
+			args: args{
+				ref: "refs/tags/v1.0",
+				sha: "abc123",
+			},
+			want: "unknown",
+		},
+		{
+			name: "v1",
+			args: args{
+				ref: "refs/tags/v1",
+				sha: "abc123",
+			},
+			want: "unknown",
+		},
+		{
+			name: "1",
+			args: args{
+				ref: "refs/tags/1",
+				sha: "abc123",
+			},
+			want: "unknown",
+		},
+		{
+			name: "master",
+			args: args{
+				ref: "refs/heads/master",
+				sha: "abc123",
+			},
+			want: "abc123",
+		},
+		{
+			name: "main",
+			args: args{
+				ref: "refs/heads/main",
+				sha: "abc123",
+			},
+			want: "abc123",
+		},
+		{
+			name: "non numeric number",
+			args: args{
+				ref: "refs/tags/v1.a",
+				sha: "abc123",
+			},
+			want: "unknown",
+		},
+		{
+			name: "invalid ref",
+			args: args{
+				ref: "refs/heads/dev",
+				sha: "abc123",
+			},
+			want: "unknown",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := refToVersion(tt.args.ref, tt.args.sha); got != tt.want {
+				t.Errorf("refToVersion() = %v, want %v", got, tt.want)
 			}
 		})
 	}

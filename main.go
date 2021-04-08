@@ -12,15 +12,17 @@ func main() {
 	fmt.Printf(getOutput(os.Getenv("GITHUB_REPOSITORY"),
 		os.Getenv("INPUT_REPOSITORY"),
 		os.Getenv("GITHUB_REF"),
+		os.Getenv("GITHUB_SHA"),
 		os.Getenv("INPUT_REGISTRIES")))
 }
 
-func getOutput(gitRepo, inputRepo, gitRef, inputRegistries string) string {
+func getOutput(gitRepo, inputRepo, gitRef, gitSHA, inputRegistries string) string {
 	imageName := getImageName(gitRepo, inputRepo)
 	registries := parseRegistriesInput(inputRegistries)
+	version := refToVersion(gitRef, gitSHA)
 	versions := refToVersions(gitRef)
 	tags := getTags(imageName, registries, versions)
-	return fmt.Sprintf("::set-output name=tags::%s", strings.Join(tags, ","))
+	return fmt.Sprintf("::set-output name=tags::%s\n::set-output name=version::%s", strings.Join(tags, ","), version)
 }
 
 func getTags(imageName string, registries []string, versions []string) (tags []string) {
@@ -32,8 +34,21 @@ func getTags(imageName string, registries []string, versions []string) (tags []s
 	return
 }
 
+func refToVersion(ref string, sha string) string {
+	if ref == "refs/heads/master" || ref == "refs/heads/main" {
+		return sha
+	}
+	ref = strings.TrimPrefix(ref, "refs/tags/")
+	ref = strings.TrimPrefix(ref, "v")
+	version, err := semver.New(ref)
+	if err != nil {
+		fmt.Printf("Error: %s\n", err)
+		return "unknown"
+	}
+	return fmt.Sprintf("%d.%d.%d", version.Major, version.Minor, version.Patch)
+}
+
 func refToVersions(ref string) (versions []string) {
-	fmt.Printf("Version: %s\n", ref)
 	if ref == "refs/heads/master" || ref == "refs/heads/main" {
 		versions = append(versions, "latest")
 		return

@@ -13,7 +13,8 @@ This action generates a list of docker tags for a given refspec.
  - `registries` - A comma separated list of registry names to push to, defaults to docker hub
 
 ## Outputs
-A comma separated list of tags to be passed to `docker/build-push-action@v2`
+ - tag: A comma separated list of tags to be passed to `docker/build-push-action@v2`
+ - version: The semver parsed version of the image, or the SHA if this is not tag
 
 ## Example
 
