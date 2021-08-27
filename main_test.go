@@ -127,6 +127,7 @@ func Test_getTags(t *testing.T) {
 		imageName  string
 		registries []string
 		versions   []string
+		fullname bool
 	}
 	tests := []struct {
 		name     string
@@ -134,45 +135,69 @@ func Test_getTags(t *testing.T) {
 		wantTags []string
 	}{
 		{
-			name: "single registry",
+			name: "single registry (full name)",
 			args: args{
 				imageName:  "name",
 				registries: []string{"registry1"},
 				versions:   []string{"1.0.1"},
+				fullname: true,
 			},
 			wantTags: []string{"registry1/name:1.0.1"},
 		},
 		{
-			name: "multiple registries",
+			name: "multiple registries (full name)",
 			args: args{
 				imageName:  "name",
 				registries: []string{"registry1", "registry2"},
 				versions:   []string{"1.0.1"},
+				fullname: true,
 			},
 			wantTags: []string{"registry1/name:1.0.1", "registry2/name:1.0.1"},
 		},
 		{
-			name: "multiple versions",
+			name: "multiple versions (full name)",
 			args: args{
 				imageName:  "name",
 				registries: []string{"registry1"},
 				versions:   []string{"1.0.1", "latest"},
+				fullname: true,
 			},
 			wantTags: []string{"registry1/name:1.0.1", "registry1/name:latest"},
 		},
 		{
-			name: "multiple both",
+			name: "multiple versions (mo full name)",
+			args: args{
+				imageName:  "name",
+				registries: []string{"registry1"},
+				versions:   []string{"1.0.1", "latest"},
+				fullname: false,
+			},
+			wantTags: []string{"1.0.1", "latest"},
+		},
+		{
+			name: "multiple both (full name)",
 			args: args{
 				imageName:  "name",
 				registries: []string{"registry1", "registry2"},
 				versions:   []string{"1.0.1", "latest"},
+				fullname: true,
 			},
 			wantTags: []string{"registry1/name:1.0.1", "registry1/name:latest", "registry2/name:1.0.1", "registry2/name:latest"},
+		},
+		{
+			name: "multiple both (no full name)",
+			args: args{
+				imageName:  "name",
+				registries: []string{"registry1", "registry2"},
+				versions:   []string{"1.0.1", "latest"},
+				fullname: false,
+			},
+			wantTags: []string{"1.0.1", "latest", "1.0.1", "latest"},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if gotTags := getTags(tt.args.imageName, tt.args.registries, tt.args.versions); !reflect.DeepEqual(gotTags, tt.wantTags) {
+			if gotTags := getTags(tt.args.imageName, tt.args.registries, tt.args.versions, tt.args.fullname); !reflect.DeepEqual(gotTags, tt.wantTags) {
 				t.Errorf("getTags() = %v, want %v", gotTags, tt.wantTags)
 			}
 		})
@@ -230,6 +255,7 @@ func Test_getOutput(t *testing.T) {
 		gitRef          string
 		gitSHA          string
 		inputRegistries string
+		fullName	string
 	}
 	tests := []struct {
 		name string
@@ -244,8 +270,21 @@ func Test_getOutput(t *testing.T) {
 				gitRef:          "refs/heads/master",
 				gitSHA:          "abc123",
 				inputRegistries: "",
+				fullName: "true",
 			},
 			want: "::set-output name=tags::docker.io/group/test:latest\n::set-output name=version::abc123",
+		},
+		{
+			name: "valid input no full name",
+			args: args{
+				gitRepo:         "group/test",
+				inputRepo:       "",
+				gitRef:          "refs/heads/master",
+				gitSHA:          "abc123",
+				inputRegistries: "",
+				fullName: "false",
+			},
+			want: "::set-output name=tags::latest\n::set-output name=version::abc123",
 		},
 		{
 			name: "invalid input",
@@ -255,13 +294,14 @@ func Test_getOutput(t *testing.T) {
 				gitRef:          "refs/heads/dev",
 				gitSHA:          "abc123",
 				inputRegistries: "",
+				fullName: "true",
 			},
 			want: "::set-output name=tags::\n::set-output name=version::unknown",
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := getOutput(tt.args.gitRepo, tt.args.inputRepo, tt.args.gitRef, tt.args.gitSHA, tt.args.inputRegistries, defaultSeparator); got != tt.want {
+			if got := getOutput(tt.args.gitRepo, tt.args.inputRepo, tt.args.gitRef, tt.args.gitSHA, tt.args.inputRegistries, defaultSeparator, tt.args.fullName); got != tt.want {
 				t.Errorf("getOutput() = %v, want %v", got, tt.want)
 			}
 		})
@@ -378,9 +418,9 @@ func Test_refToVersion(t *testing.T) {
 
 func Test_getSeparator(t *testing.T) {
 	tests := []struct {
-		name string
+		name  string
 		input string
-		want string
+		want  string
 	}{
 		{
 			name:  "Blank input",
@@ -408,10 +448,56 @@ func Test_getSeparator(t *testing.T) {
 			want:  "👩🏿‍🚀",
 		},
 	}
-		for _, tt := range tests {
+	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := getSeparator(tt.input); got != tt.want {
 				t.Errorf("getSeparator() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_getFullName(t *testing.T) {
+	tests := []struct {
+		name  string
+		input string
+		want  bool
+	}{
+		{
+			name:  "Blank",
+			input: "",
+			want:  true,
+		},
+		{
+			name:  "true",
+			input: "true",
+			want:  true,
+		},
+		{
+			name:  "1",
+			input: "1",
+			want:  true,
+		},
+		{
+			name:  "0",
+			input: "0",
+			want:  false,
+		},
+		{
+			name:  "false",
+			input: "false",
+			want:  false,
+		},
+		{
+			name:  "random",
+			input: "random",
+			want:  false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := getFullName(tt.input); got != tt.want {
+				t.Errorf("getFullName() = %v, want %v", got, tt.want)
 			}
 		})
 	}

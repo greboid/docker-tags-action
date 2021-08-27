@@ -14,6 +14,10 @@ inputs:
     description: 'Separator to use between tags'
     required: false
     default: ','
+  fullname:
+    description: 'Should we include registry/image in tags, or just versions'
+    required: false
+    default: 'true'
 outputs:
   tags:
     description: "All tags that should be set on a Docker image"
@@ -21,4 +25,4 @@ outputs:
     description: "The semver parsed version of the image, or the SHA if this is not tag"
 runs:
   using: "docker"
-  image: "docker://ghcr.io/greboid/docker-tags-action:3"
+  image: "docker://ghcr.io/greboid/docker-tags-action:4"

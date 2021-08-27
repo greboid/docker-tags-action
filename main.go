@@ -19,6 +19,7 @@ func main() {
 			os.Getenv("GITHUB_SHA"),
 			os.Getenv("INPUT_REGISTRIES"),
 			os.Getenv("INPUT_SEPARATOR"),
+			os.Getenv("INPUT_FULLNAME"),
 		))
 }
 
@@ -29,20 +30,28 @@ func getSeparator(input string) string {
 	return input
 }
 
-func getOutput(gitRepo, inputRepo, gitRef, gitSHA, inputRegistries, separator string) string {
+func getFullName(input string) bool {
+	return input == "" || input == "true" || input == "1"
+}
+
+func getOutput(gitRepo, inputRepo, gitRef, gitSHA, inputRegistries, separator string, fullName string) string {
 	imageName := getImageName(gitRepo, inputRepo)
 	registries := parseRegistriesInput(inputRegistries)
 	version := refToVersion(gitRef, gitSHA)
 	versions := refToVersions(gitRef)
-	tags := getTags(imageName, registries, versions)
+	tags := getTags(imageName, registries, versions, getFullName(fullName))
 	separator = getSeparator(separator)
 	return fmt.Sprintf("::set-output name=tags::%s\n::set-output name=version::%s", strings.Join(tags, separator), version)
 }
 
-func getTags(imageName string, registries []string, versions []string) (tags []string) {
+func getTags(imageName string, registries []string, versions []string, fullname bool) (tags []string) {
 	for _, registry := range registries {
 		for _, version := range versions {
-			tags = append(tags, fmt.Sprintf("%s/%s:%s", registry, imageName, version))
+			if fullname {
+				tags = append(tags, fmt.Sprintf("%s/%s:%s", registry, imageName, version))
+			} else {
+				tags = append(tags, fmt.Sprintf("%s", version))
+			}
 		}
 	}
 	return
