@@ -11,6 +11,7 @@ This action generates a list of docker tags for a given refspec.
 
  - `repository` - Image name, if you don't want to use the git repository name
  - `registries` - A comma separated list of registry names to push to, defaults to docker hub
+ - `separator` - Optional, the separator between tags, defaults to `,`
 
 ## Outputs
  - tag: A comma separated list of tags to be passed to `docker/build-push-action@v2`

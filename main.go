@@ -18,7 +18,7 @@ func main() {
 			os.Getenv("GITHUB_REF"),
 			os.Getenv("GITHUB_SHA"),
 			os.Getenv("INPUT_REGISTRIES"),
-			os.Getenv("TAG_SEPARATOR"),
+			os.Getenv("INPUT_SEPARATOR"),
 		))
 }
 
