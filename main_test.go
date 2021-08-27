@@ -261,7 +261,7 @@ func Test_getOutput(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := getOutput(tt.args.gitRepo, tt.args.inputRepo, tt.args.gitRef, tt.args.gitSHA, tt.args.inputRegistries); got != tt.want {
+			if got := getOutput(tt.args.gitRepo, tt.args.inputRepo, tt.args.gitRef, tt.args.gitSHA, tt.args.inputRegistries, defaultSeparator); got != tt.want {
 				t.Errorf("getOutput() = %v, want %v", got, tt.want)
 			}
 		})
@@ -371,6 +371,47 @@ func Test_refToVersion(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := refToVersion(tt.args.ref, tt.args.sha); got != tt.want {
 				t.Errorf("refToVersion() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_getSeparator(t *testing.T) {
+	tests := []struct {
+		name string
+		input string
+		want string
+	}{
+		{
+			name:  "Blank input",
+			input: "",
+			want:  defaultSeparator,
+		},
+		{
+			name:  "Comma",
+			input: ",",
+			want:  ",",
+		},
+		{
+			name:  "Space",
+			input: " ",
+			want:  " ",
+		},
+		{
+			name:  "Multiple",
+			input: "test",
+			want:  "test",
+		},
+		{
+			name:  "Unicode",
+			input: "👩🏿‍🚀",
+			want:  "👩🏿‍🚀",
+		},
+	}
+		for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := getSeparator(tt.input); got != tt.want {
+				t.Errorf("getSeparator() = %v, want %v", got, tt.want)
 			}
 		})
 	}

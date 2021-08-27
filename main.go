@@ -8,21 +8,35 @@ import (
 	"github.com/blang/semver/v4"
 )
 
+const defaultSeparator = ","
+
 func main() {
-	fmt.Printf(getOutput(os.Getenv("GITHUB_REPOSITORY"),
-		os.Getenv("INPUT_REPOSITORY"),
-		os.Getenv("GITHUB_REF"),
-		os.Getenv("GITHUB_SHA"),
-		os.Getenv("INPUT_REGISTRIES")))
+	fmt.Printf(
+		getOutput(
+			os.Getenv("GITHUB_REPOSITORY"),
+			os.Getenv("INPUT_REPOSITORY"),
+			os.Getenv("GITHUB_REF"),
+			os.Getenv("GITHUB_SHA"),
+			os.Getenv("INPUT_REGISTRIES"),
+			os.Getenv("TAG_SEPARATOR"),
+		))
 }
 
-func getOutput(gitRepo, inputRepo, gitRef, gitSHA, inputRegistries string) string {
+func getSeparator(input string) string {
+	if input == "" {
+		return defaultSeparator
+	}
+	return input
+}
+
+func getOutput(gitRepo, inputRepo, gitRef, gitSHA, inputRegistries, separator string) string {
 	imageName := getImageName(gitRepo, inputRepo)
 	registries := parseRegistriesInput(inputRegistries)
 	version := refToVersion(gitRef, gitSHA)
 	versions := refToVersions(gitRef)
 	tags := getTags(imageName, registries, versions)
-	return fmt.Sprintf("::set-output name=tags::%s\n::set-output name=version::%s", strings.Join(tags, ","), version)
+	separator = getSeparator(separator)
+	return fmt.Sprintf("::set-output name=tags::%s\n::set-output name=version::%s", strings.Join(tags, separator), version)
 }
 
 func getTags(imageName string, registries []string, versions []string) (tags []string) {
