@@ -25,4 +25,4 @@ outputs:
     description: "The semver parsed version of the image, or the SHA if this is not tag"
 runs:
   using: "docker"
-  image: "docker://ghcr.io/greboid/docker-tags-action:4"
+  image: "docker://ghcr.io/greboid/docker-tags-action:5"
