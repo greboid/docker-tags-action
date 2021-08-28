@@ -10,7 +10,7 @@ func Test_getTags(t *testing.T) {
 		imageName  string
 		registries []string
 		versions   []string
-		fullname bool
+		fullname   bool
 	}
 	tests := []struct {
 		name     string
@@ -23,7 +23,7 @@ func Test_getTags(t *testing.T) {
 				imageName:  "name",
 				registries: []string{"registry1"},
 				versions:   []string{"1.0.1"},
-				fullname: true,
+				fullname:   true,
 			},
 			wantTags: []string{"registry1/name:1.0.1"},
 		},
@@ -33,7 +33,7 @@ func Test_getTags(t *testing.T) {
 				imageName:  "name",
 				registries: []string{"registry1", "registry2"},
 				versions:   []string{"1.0.1"},
-				fullname: true,
+				fullname:   true,
 			},
 			wantTags: []string{"registry1/name:1.0.1", "registry2/name:1.0.1"},
 		},
@@ -43,7 +43,7 @@ func Test_getTags(t *testing.T) {
 				imageName:  "name",
 				registries: []string{"registry1"},
 				versions:   []string{"1.0.1", "latest"},
-				fullname: true,
+				fullname:   true,
 			},
 			wantTags: []string{"registry1/name:1.0.1", "registry1/name:latest"},
 		},
@@ -53,7 +53,7 @@ func Test_getTags(t *testing.T) {
 				imageName:  "name",
 				registries: []string{"registry1"},
 				versions:   []string{"1.0.1", "latest"},
-				fullname: false,
+				fullname:   false,
 			},
 			wantTags: []string{"1.0.1", "latest"},
 		},
@@ -63,7 +63,7 @@ func Test_getTags(t *testing.T) {
 				imageName:  "name",
 				registries: []string{"registry1", "registry2"},
 				versions:   []string{"1.0.1", "latest"},
-				fullname: true,
+				fullname:   true,
 			},
 			wantTags: []string{"registry1/name:1.0.1", "registry1/name:latest", "registry2/name:1.0.1", "registry2/name:latest"},
 		},
@@ -73,7 +73,7 @@ func Test_getTags(t *testing.T) {
 				imageName:  "name",
 				registries: []string{"registry1", "registry2"},
 				versions:   []string{"1.0.1", "latest"},
-				fullname: false,
+				fullname:   false,
 			},
 			wantTags: []string{"1.0.1", "latest", "1.0.1", "latest"},
 		},
@@ -195,7 +195,6 @@ func Test_refToVersion(t *testing.T) {
 	}
 }
 
-
 func Test_refToVersions(t *testing.T) {
 	tests := []struct {
 		name         string
@@ -205,12 +204,12 @@ func Test_refToVersions(t *testing.T) {
 		{
 			name:         "v1.0.0",
 			input:        "refs/tags/v1.0.0",
-			wantVersions: []string{"1.0.0", "1.0", "1"},
+			wantVersions: []string{"latest", "1.0.0", "1.0", "1"},
 		},
 		{
 			name:         "1.0.0",
 			input:        "refs/tags/v1.0.0",
-			wantVersions: []string{"1.0.0", "1.0", "1"},
+			wantVersions: []string{"latest", "1.0.0", "1.0", "1"},
 		},
 		{
 			name:         "v1.0.0.0.0.0",
@@ -240,12 +239,12 @@ func Test_refToVersions(t *testing.T) {
 		{
 			name:         "master",
 			input:        "refs/heads/master",
-			wantVersions: []string{"latest"},
+			wantVersions: []string{"dev"},
 		},
 		{
 			name:         "main",
 			input:        "refs/heads/main",
-			wantVersions: []string{"latest"},
+			wantVersions: []string{"dev"},
 		},
 		{
 			name:         "non numeric number",

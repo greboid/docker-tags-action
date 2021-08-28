@@ -36,7 +36,7 @@ func refToVersion(ref string, sha string) string {
 
 func refToVersions(ref string) (versions []string) {
 	if ref == "refs/heads/master" || ref == "refs/heads/main" {
-		versions = append(versions, "latest")
+		versions = append(versions, "dev")
 		return
 	}
 	ref = strings.TrimPrefix(ref, "refs/tags/")
@@ -46,6 +46,7 @@ func refToVersions(ref string) (versions []string) {
 		fmt.Printf("Error: %s\n", err)
 		return
 	}
+	versions = append(versions, "latest")
 	versions = append(versions, fmt.Sprintf("%d.%d.%d", version.Major, version.Minor, version.Patch))
 	versions = append(versions, fmt.Sprintf("%d.%d", version.Major, version.Minor))
 	versions = append(versions, fmt.Sprintf("%d", version.Major))

@@ -15,7 +15,6 @@ func getFullName(input string) bool {
 	return input == "" || input == "true" || input == "1"
 }
 
-
 func getImageName(gitRepo string, inputRepo string) string {
 	if strings.TrimSpace(inputRepo) != "" {
 		return inputRepo

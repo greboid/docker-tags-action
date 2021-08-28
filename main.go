@@ -17,5 +17,6 @@ func main() {
 			os.Getenv("INPUT_REGISTRIES"),
 			os.Getenv("INPUT_SEPARATOR"),
 			os.Getenv("INPUT_FULLNAME"),
-		))
+		),
+	)
 }

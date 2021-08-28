@@ -11,7 +11,7 @@ func Test_getOutput(t *testing.T) {
 		gitRef          string
 		gitSHA          string
 		inputRegistries string
-		fullName	string
+		fullName        string
 	}
 	tests := []struct {
 		name string
@@ -26,9 +26,9 @@ func Test_getOutput(t *testing.T) {
 				gitRef:          "refs/heads/master",
 				gitSHA:          "abc123",
 				inputRegistries: "",
-				fullName: "true",
+				fullName:        "true",
 			},
-			want: "::set-output name=tags::docker.io/group/test:latest\n::set-output name=version::abc123",
+			want: "::set-output name=tags::docker.io/group/test:dev\n::set-output name=version::abc123",
 		},
 		{
 			name: "valid input no full name",
@@ -38,9 +38,9 @@ func Test_getOutput(t *testing.T) {
 				gitRef:          "refs/heads/master",
 				gitSHA:          "abc123",
 				inputRegistries: "",
-				fullName: "false",
+				fullName:        "false",
 			},
-			want: "::set-output name=tags::latest\n::set-output name=version::abc123",
+			want: "::set-output name=tags::dev\n::set-output name=version::abc123",
 		},
 		{
 			name: "invalid input",
@@ -50,7 +50,7 @@ func Test_getOutput(t *testing.T) {
 				gitRef:          "refs/heads/dev",
 				gitSHA:          "abc123",
 				inputRegistries: "",
-				fullName: "true",
+				fullName:        "true",
 			},
 			want: "::set-output name=tags::\n::set-output name=version::unknown",
 		},
