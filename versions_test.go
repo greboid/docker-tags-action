@@ -3,6 +3,8 @@ package main
 import (
 	"reflect"
 	"testing"
+
+	"github.com/blang/semver/v4"
 )
 
 func Test_getTags(t *testing.T) {
@@ -199,68 +201,139 @@ func Test_refToVersions(t *testing.T) {
 	tests := []struct {
 		name         string
 		input        string
+		latestVersion semver.Version
 		wantVersions []string
 	}{
 		{
 			name:         "v1.0.0",
 			input:        "refs/tags/v1.0.0",
+			latestVersion: semver.MustParse("1.0.0"),
 			wantVersions: []string{"latest", "1.0.0", "1.0", "1"},
 		},
 		{
 			name:         "1.0.0",
 			input:        "refs/tags/v1.0.0",
+			latestVersion: semver.MustParse("1.0.0"),
 			wantVersions: []string{"latest", "1.0.0", "1.0", "1"},
 		},
 		{
 			name:         "v1.0.0.0.0.0",
 			input:        "refs/tags/v1.0.0.0.0.0",
+			latestVersion: semver.MustParse("1.0.0"),
 			wantVersions: nil,
 		},
 		{
 			name:         "1.0",
 			input:        "refs/tags/1.0",
+			latestVersion: semver.MustParse("1.0.0"),
 			wantVersions: nil,
 		},
 		{
 			name:         "v1.0",
 			input:        "refs/tags/v1.0",
+			latestVersion: semver.MustParse("1.0.0"),
 			wantVersions: nil,
 		},
 		{
 			name:         "1",
 			input:        "refs/tags/1",
+			latestVersion: semver.MustParse("1.0.0"),
 			wantVersions: nil,
 		},
 		{
 			name:         "v1",
 			input:        "refs/tags/v1",
+			latestVersion: semver.MustParse("1.0.0"),
 			wantVersions: nil,
 		},
 		{
 			name:         "master",
 			input:        "refs/heads/master",
+			latestVersion: semver.MustParse("1.0.0"),
 			wantVersions: []string{"dev"},
 		},
 		{
 			name:         "main",
 			input:        "refs/heads/main",
+			latestVersion: semver.MustParse("1.0.0"),
 			wantVersions: []string{"dev"},
 		},
 		{
 			name:         "non numeric number",
 			input:        "refs/tags/v1.a",
+			latestVersion: semver.MustParse("1.0.0"),
 			wantVersions: nil,
 		},
 		{
 			name:         "invalid ref",
 			input:        "refs/heads/dev",
+			latestVersion: semver.MustParse("1.0.0"),
 			wantVersions: nil,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if gotVersions := refToVersions(tt.input); !reflect.DeepEqual(gotVersions, tt.wantVersions) {
+			if gotVersions := refToVersions(tt.input, &tt.latestVersion); !reflect.DeepEqual(gotVersions, tt.wantVersions) {
 				t.Errorf("refToVersions() = %v, want %v", gotVersions, tt.wantVersions)
+			}
+		})
+	}
+}
+
+func Test_getLatestVersion(t *testing.T) {
+	tests := []struct {
+		name    string
+		versions []string
+		want    string
+		wantErr bool
+	}{
+		{
+			name:     "Normal",
+			versions: []string{"7.0.0", "1.0.0"},
+			want:     "7.0.0",
+			wantErr:  false,
+		},
+		{
+			name:     "Incorrect larger",
+			versions: []string{"7.0", "1.0.0"},
+			want:     "1.0.0",
+			wantErr:  false,
+		},
+		{
+			name:     "No version",
+			versions: []string{"7.0", "1.0"},
+			want:     "0.0.0",
+			wantErr:  true,
+		},
+		{
+			name:     "has Prerelease",
+			versions: []string{"7.0.0-alpha", "1.0.0"},
+			want:     "1.0.0",
+			wantErr:  false,
+		},
+		{
+			name:     "has Build",
+			versions: []string{"7.0.0+1", "1.0.0"},
+			want:     "7.0.0+1",
+			wantErr:  false,
+		},
+		{
+			name:     "has Build",
+			versions: []string{"7.0.0+1", "7.0.0", "1.0.0"},
+			want:     "7.0.0+1",
+			wantErr:  false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := getLatestVersion(tt.versions)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("getLatestVersion() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			wantSemVer := semver.MustParse(tt.want)
+			if !reflect.DeepEqual(got, &wantSemVer) {
+				t.Errorf("getLatestVersion() got = %#v, want %#v", got, tt.want)
 			}
 		})
 	}
