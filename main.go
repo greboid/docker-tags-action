@@ -10,7 +10,7 @@ const defaultSeparator = ","
 func main() {
 	gitTags, err := getGitTags(os.Getenv("GITHUB_WORKSPACE"))
 	if err != nil {
-		fmt.Printf("::error ::Unable to pull tags")
+		fmt.Printf("::error ::Unable to pull tags: %s", err.Error())
 		return
 	}
 	latestVersion, err := getLatestVersion(gitTags)
