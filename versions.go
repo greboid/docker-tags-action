@@ -1,9 +1,7 @@
 package main
 
 import (
-	"errors"
 	"fmt"
-	"log"
 	"strings"
 
 	"github.com/blang/semver/v4"
@@ -36,7 +34,7 @@ func refToVersion(ref string, sha string) string {
 	return fmt.Sprintf("%d.%d.%d", version.Major, version.Minor, version.Patch)
 }
 
-func refToVersions(ref string, latestVersion *semver.Version) (versions []string) {
+func refToVersions(ref string) (versions []string) {
 	if ref == "refs/heads/master" || ref == "refs/heads/main" {
 		versions = append(versions, "dev")
 		return
@@ -48,35 +46,9 @@ func refToVersions(ref string, latestVersion *semver.Version) (versions []string
 		fmt.Printf("Error: %s\n", err)
 		return
 	}
-	if latestVersion.Major == version.Major {
-		versions = append(versions, "latest")
-	}
+	versions = append(versions, "latest")
 	versions = append(versions, fmt.Sprintf("%d.%d.%d", version.Major, version.Minor, version.Patch))
 	versions = append(versions, fmt.Sprintf("%d.%d", version.Major, version.Minor))
 	versions = append(versions, fmt.Sprintf("%d", version.Major))
 	return
-}
-
-func getLatestVersion(versions []string) (*semver.Version, error) {
-	hasVersion := false
-	latestVersion := semver.MustParse("0.0.0")
-	for index := range versions {
-		semVersion, err := semver.New(versions[index])
-		if err != nil {
-			log.Printf("Error parsing semver: %s", err)
-			continue
-		}
-		if len(semVersion.Pre) > 0 {
-			log.Printf("Ignoring pre-release")
-			continue
-		}
-		if semVersion.GT(latestVersion) {
-			hasVersion = true
-			latestVersion = *semVersion
-		}
-	}
-	if hasVersion {
-		return &latestVersion, nil
-	}
-	return &latestVersion, errors.New("no versions")
 }

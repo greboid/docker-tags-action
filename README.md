@@ -7,8 +7,8 @@ This action generates a list of docker tags for a given refspec.
 - You can specify the image name
 - You can specify a list of registries to push to if you're not using docker hub (or want multiples)
 
-The latest tag will refer to the highest semver that has been tagged, including if you push to an 
-older tag.
+The last tag pushed will always be marked as latest, this will be a little weird if you're doing a
+bug fix on an older build, but something I'll look to address.
 
 ## Inputs
 
