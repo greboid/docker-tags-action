@@ -199,76 +199,76 @@ func Test_refToVersion(t *testing.T) {
 
 func Test_refToVersions(t *testing.T) {
 	tests := []struct {
-		name         string
-		input        string
+		name          string
+		input         string
 		latestVersion semver.Version
-		wantVersions []string
+		wantVersions  []string
 	}{
 		{
-			name:         "v1.0.0",
-			input:        "refs/tags/v1.0.0",
+			name:          "v1.0.0",
+			input:         "refs/tags/v1.0.0",
 			latestVersion: semver.MustParse("1.0.0"),
-			wantVersions: []string{"latest", "1.0.0", "1.0", "1"},
+			wantVersions:  []string{"latest", "1.0.0", "1.0", "1"},
 		},
 		{
-			name:         "1.0.0",
-			input:        "refs/tags/v1.0.0",
+			name:          "1.0.0",
+			input:         "refs/tags/v1.0.0",
 			latestVersion: semver.MustParse("1.0.0"),
-			wantVersions: []string{"latest", "1.0.0", "1.0", "1"},
+			wantVersions:  []string{"latest", "1.0.0", "1.0", "1"},
 		},
 		{
-			name:         "v1.0.0.0.0.0",
-			input:        "refs/tags/v1.0.0.0.0.0",
+			name:          "v1.0.0.0.0.0",
+			input:         "refs/tags/v1.0.0.0.0.0",
 			latestVersion: semver.MustParse("1.0.0"),
-			wantVersions: nil,
+			wantVersions:  nil,
 		},
 		{
-			name:         "1.0",
-			input:        "refs/tags/1.0",
+			name:          "1.0",
+			input:         "refs/tags/1.0",
 			latestVersion: semver.MustParse("1.0.0"),
-			wantVersions: nil,
+			wantVersions:  nil,
 		},
 		{
-			name:         "v1.0",
-			input:        "refs/tags/v1.0",
+			name:          "v1.0",
+			input:         "refs/tags/v1.0",
 			latestVersion: semver.MustParse("1.0.0"),
-			wantVersions: nil,
+			wantVersions:  nil,
 		},
 		{
-			name:         "1",
-			input:        "refs/tags/1",
+			name:          "1",
+			input:         "refs/tags/1",
 			latestVersion: semver.MustParse("1.0.0"),
-			wantVersions: nil,
+			wantVersions:  nil,
 		},
 		{
-			name:         "v1",
-			input:        "refs/tags/v1",
+			name:          "v1",
+			input:         "refs/tags/v1",
 			latestVersion: semver.MustParse("1.0.0"),
-			wantVersions: nil,
+			wantVersions:  nil,
 		},
 		{
-			name:         "master",
-			input:        "refs/heads/master",
+			name:          "master",
+			input:         "refs/heads/master",
 			latestVersion: semver.MustParse("1.0.0"),
-			wantVersions: []string{"dev"},
+			wantVersions:  []string{"dev"},
 		},
 		{
-			name:         "main",
-			input:        "refs/heads/main",
+			name:          "main",
+			input:         "refs/heads/main",
 			latestVersion: semver.MustParse("1.0.0"),
-			wantVersions: []string{"dev"},
+			wantVersions:  []string{"dev"},
 		},
 		{
-			name:         "non numeric number",
-			input:        "refs/tags/v1.a",
+			name:          "non numeric number",
+			input:         "refs/tags/v1.a",
 			latestVersion: semver.MustParse("1.0.0"),
-			wantVersions: nil,
+			wantVersions:  nil,
 		},
 		{
-			name:         "invalid ref",
-			input:        "refs/heads/dev",
+			name:          "invalid ref",
+			input:         "refs/heads/dev",
 			latestVersion: semver.MustParse("1.0.0"),
-			wantVersions: nil,
+			wantVersions:  nil,
 		},
 	}
 	for _, tt := range tests {
@@ -282,10 +282,10 @@ func Test_refToVersions(t *testing.T) {
 
 func Test_getLatestVersion(t *testing.T) {
 	tests := []struct {
-		name    string
+		name     string
 		versions []string
-		want    string
-		wantErr bool
+		want     string
+		wantErr  bool
 	}{
 		{
 			name:     "Normal",

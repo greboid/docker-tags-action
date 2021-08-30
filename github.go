@@ -1,48 +1,35 @@
 package main
 
 import (
-	"errors"
-	"fmt"
-	"strings"
+	"context"
 
-	"github.com/blang/semver/v4"
-	"github.com/go-git/go-git/v5"
-	"github.com/go-git/go-git/v5/plumbing"
+	"github.com/google/go-github/v38/github"
+	"golang.org/x/oauth2"
 )
 
-func getOutput(gitRepo, inputRepo, gitRef, gitSHA, inputRegistries, separator, fullName string, latestVersion *semver.Version) string {
-	imageName := getImageName(gitRepo, inputRepo)
-	registries := parseRegistriesInput(inputRegistries)
-	version := refToVersion(gitRef, gitSHA)
-	versions := refToVersions(gitRef, latestVersion)
-	tags := getTags(imageName, registries, versions, getFullName(fullName))
-	separator = getSeparator(separator)
-	return fmt.Sprintf("::set-output name=tags::%s\n::set-output name=version::%s", strings.Join(tags, separator), version)
-}
-
-func getGitTags(directory string) ([]string, error) {
-	repo, err := git.PlainOpen(directory)
-	if err != nil {
-		return nil, err
+func getGitTags(owner, repo string, token string) ([]string, error) {
+	client := github.NewClient(oauth2.NewClient(context.Background(),
+		oauth2.StaticTokenSource(
+			&oauth2.Token{AccessToken: token},
+		)))
+	opt := &github.ListOptions{
+		PerPage: 10,
 	}
-	err = repo.Fetch(&git.FetchOptions{
-		Tags: git.AllTags,
-		Force: true,
-	})
-	if err != nil && !errors.Is(err, git.NoErrAlreadyUpToDate) {
-		return nil, err
+	var allTags []*github.RepositoryTag
+	for {
+		tags, resp, err := client.Repositories.ListTags(context.Background(), owner, repo, opt)
+		if err != nil {
+			return []string{}, err
+		}
+		allTags = append(allTags, tags...)
+		if resp.NextPage == 0 {
+			break
+		}
+		opt.Page = resp.NextPage
 	}
-	iter, err := repo.Tags()
-	if err != nil {
-		return nil, err
+	var allTagsString []string
+	for index := range allTags {
+		allTagsString = append(allTagsString, *allTags[index].Name)
 	}
-	tags := make([]string, 0)
-	err = iter.ForEach(func(reference *plumbing.Reference) error {
-		tags = append(tags, reference.Name().Short())
-		return nil
-	})
-	if err != nil {
-		return nil, err
-	}
-	return tags, nil
+	return allTagsString, nil
 }

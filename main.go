@@ -3,12 +3,20 @@ package main
 import (
 	"fmt"
 	"os"
+	"strings"
+
+	"github.com/blang/semver/v4"
 )
 
 const defaultSeparator = ","
 
 func main() {
-	gitTags, err := getGitTags(os.Getenv("GITHUB_WORKSPACE"))
+	repo, owner, err := splitRepo(os.Getenv("GITHUB_REPOSITORY"))
+	if err != nil {
+		fmt.Printf("::error ::Unable to split repo: %s", err.Error())
+		return
+	}
+	gitTags, err := getGitTags(repo, owner, os.Getenv("secrets.GITHUB_TOKEN"))
 	if err != nil {
 		fmt.Printf("::error ::Unable to pull tags: %s", err.Error())
 		return
@@ -30,4 +38,14 @@ func main() {
 			latestVersion,
 		),
 	)
+}
+
+func getOutput(gitRepo, inputRepo, gitRef, gitSHA, inputRegistries, separator, fullName string, latestVersion *semver.Version) string {
+	imageName := getImageName(gitRepo, inputRepo)
+	registries := parseRegistriesInput(inputRegistries)
+	version := refToVersion(gitRef, gitSHA)
+	versions := refToVersions(gitRef, latestVersion)
+	tags := getTags(imageName, registries, versions, getFullName(fullName))
+	separator = getSeparator(separator)
+	return fmt.Sprintf("::set-output name=tags::%s\n::set-output name=version::%s", strings.Join(tags, separator), version)
 }
