@@ -2,6 +2,8 @@ package main
 
 import (
 	"testing"
+
+	"github.com/blang/semver/v4"
 )
 
 func Test_getOutput(t *testing.T) {
@@ -12,6 +14,7 @@ func Test_getOutput(t *testing.T) {
 		gitSHA          string
 		inputRegistries string
 		fullName        string
+		latestVersion   *semver.Version
 	}
 	tests := []struct {
 		name string
@@ -57,7 +60,7 @@ func Test_getOutput(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := getOutput(tt.args.gitRepo, tt.args.inputRepo, tt.args.gitRef, tt.args.gitSHA, tt.args.inputRegistries, defaultSeparator, tt.args.fullName); got != tt.want {
+			if got := getOutput(tt.args.gitRepo, tt.args.inputRepo, tt.args.gitRef, tt.args.gitSHA, tt.args.inputRegistries, defaultSeparator, tt.args.fullName, tt.args.latestVersion); got != tt.want {
 				t.Errorf("getOutput() = %v, want %v", got, tt.want)
 			}
 		})

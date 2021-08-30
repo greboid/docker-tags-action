@@ -2,6 +2,9 @@ name: "Semver docker tags"
 author: "Greg Holmes"
 description: "Generates a list of docker tags for a given refspec"
 inputs:
+  token:
+    description: 'Github authentication token, used to list tags on the repository'
+    required: true
   registries:
     description: 'list of registries to push to, comma separated'
     required: false

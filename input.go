@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"strings"
 )
 
@@ -39,4 +40,12 @@ func parseRegistriesInput(input string) []string {
 		}
 	}
 	return output
+}
+
+func splitRepo(repo string) (string, string, error) {
+	parts := strings.Split(repo, "/")
+	if len(parts) != 2 {
+		return "", "", errors.New("invalid repo format")
+	}
+	return parts[0], parts[1], nil
 }
