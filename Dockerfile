@@ -1,4 +1,4 @@
-FROM docker.io/golang:1.17.2@sha256:45d45a39258425b0386643efc863b3b3c1481173d64ec6151b18d48b565df9a0 AS build
+FROM docker.io/golang:1.17.2@sha256:941f387984d023f357e6099e87bd799a91a17b8df3563cc067f487630e7cb1a0 AS build
 WORKDIR /app
 COPY . /app
 RUN CGO_ENABLED=0 GOOS=linux go build -a -ldflags '-extldflags "-static"' -o /app/main .
