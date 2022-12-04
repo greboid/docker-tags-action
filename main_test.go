@@ -1,6 +1,7 @@
 package main
 
 import (
+	"reflect"
 	"testing"
 
 	"github.com/blang/semver/v4"
@@ -19,7 +20,7 @@ func Test_getOutput(t *testing.T) {
 	tests := []struct {
 		name string
 		args args
-		want string
+		want map[string]string
 	}{
 		{
 			name: "valid input",
@@ -31,7 +32,7 @@ func Test_getOutput(t *testing.T) {
 				inputRegistries: "",
 				fullName:        "true",
 			},
-			want: "::set-output name=tags::docker.io/group/test:dev\n::set-output name=version::abc123",
+			want: map[string]string{"tags": "docker.io/group/test:dev", "version": "abc123"},
 		},
 		{
 			name: "valid input no full name",
@@ -43,7 +44,7 @@ func Test_getOutput(t *testing.T) {
 				inputRegistries: "",
 				fullName:        "false",
 			},
-			want: "::set-output name=tags::dev\n::set-output name=version::abc123",
+			want: map[string]string{"tags": "dev", "version": "abc123"},
 		},
 		{
 			name: "invalid input",
@@ -55,12 +56,12 @@ func Test_getOutput(t *testing.T) {
 				inputRegistries: "",
 				fullName:        "true",
 			},
-			want: "::set-output name=tags::\n::set-output name=version::unknown",
+			want: map[string]string{"tags": "", "version": "unknown"},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := getOutput(tt.args.gitRepo, tt.args.inputRepo, tt.args.gitRef, tt.args.gitSHA, tt.args.inputRegistries, defaultSeparator, tt.args.fullName, tt.args.latestVersion); got != tt.want {
+			if got := getOutput(tt.args.gitRepo, tt.args.inputRepo, tt.args.gitRef, tt.args.gitSHA, tt.args.inputRegistries, defaultSeparator, tt.args.fullName, tt.args.latestVersion); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("getOutput() = %v, want %v", got, tt.want)
 			}
 		})
