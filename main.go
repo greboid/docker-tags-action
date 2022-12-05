@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"strings"
 
@@ -11,6 +12,10 @@ import (
 const defaultSeparator = ","
 
 func main() {
+	fmt.Printf("Repository: '%s'\n", os.Getenv("GITHUB_REPOSITORY"))
+	fmt.Printf("Ref: '%s'\n", os.Getenv("GITHUB_REF"))
+	fmt.Printf("SHA: '%s'\n", os.Getenv("GITHUB_SHA"))
+
 	if os.Getenv("INPUT_TOKEN") == "" {
 		fmt.Printf("::error ::Input token is required.")
 		return
@@ -38,7 +43,8 @@ func main() {
 	)
 	err = AppendToOutputFile(output)
 	if err != nil {
-		fmt.Printf("::error ::No latest version")
+		log.Printf("Unable to save to file: %s", err)
+		fmt.Printf("::error ::Unable to save to file")
 		return
 	}
 }
@@ -58,16 +64,29 @@ func getOutput(gitRepo, inputRepo, gitRef, gitSHA, inputRegistries, separator, f
 
 func AppendToOutputFile(output map[string]string) error {
 	outFile := os.Getenv("GITHUB_OUTPUT")
-	f, err := os.OpenFile(outFile, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-	for key, value := range output {
-		_, _ = f.WriteString(key)
-		_, _ = f.WriteString("=")
-		_, _ = f.WriteString(value)
-		_, _ = f.WriteString("\n")
+	if outFile != "" {
+		f, err := os.OpenFile(outFile, os.O_APPEND|os.O_WRONLY, 0644)
+		if err != nil {
+			log.Printf("Unable to open output file: %s", err)
+			return err
+		}
+		content := strings.Builder{}
+		defer f.Close()
+		for key, value := range output {
+			content.WriteString(key)
+			content.WriteString("=")
+			content.WriteString(value)
+			content.WriteString("\n")
+		}
+		fmt.Print(content.String())
+		_, err = f.WriteString(content.String())
+		if err != nil {
+			return err
+		}
+	} else {
+		for key, value := range output {
+			fmt.Println("::set-output name=" + key + "::" + value)
+		}
 	}
 	return nil
 }
