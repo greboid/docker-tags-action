@@ -25,11 +25,7 @@ func main() {
 		fmt.Printf("::error ::Unable to pull tags: %s", err.Error())
 		return
 	}
-	latestVersion, err := getLatestVersion(gitTags)
-	if err != nil {
-		fmt.Printf("::error ::No latest version")
-		return
-	}
+	latestVersion := getLatestVersion(gitTags)
 	output := getOutput(
 		os.Getenv("GITHUB_REPOSITORY"),
 		os.Getenv("INPUT_REPOSITORY"),

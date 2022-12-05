@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"log"
 	"strings"
@@ -57,11 +56,10 @@ func refToVersions(ref string, latestVersion *semver.Version) (versions []string
 	return
 }
 
-func getLatestVersion(versions []string) (*semver.Version, error) {
-	hasVersion := false
+func getLatestVersion(versions []string) *semver.Version {
 	latestVersion := semver.MustParse("0.0.0")
 	for index := range versions {
-		semVersion, err := semver.New(versions[index])
+		semVersion, err := semver.ParseTolerant(versions[index])
 		if err != nil {
 			log.Printf("Error parsing semver: %s", err)
 			continue
@@ -71,12 +69,8 @@ func getLatestVersion(versions []string) (*semver.Version, error) {
 			continue
 		}
 		if semVersion.GT(latestVersion) {
-			hasVersion = true
-			latestVersion = *semVersion
+			latestVersion = semVersion
 		}
 	}
-	if hasVersion {
-		return &latestVersion, nil
-	}
-	return &latestVersion, errors.New("no versions")
+	return &latestVersion
 }
