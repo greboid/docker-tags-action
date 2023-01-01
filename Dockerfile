@@ -1,4 +1,4 @@
-FROM ghcr.io/greboid/dockerfiles/golang as BUILD
+FROM ghcr.io/greboid/dockerfiles/golang as build
 
 # Build the app
 WORKDIR /app
