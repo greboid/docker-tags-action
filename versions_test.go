@@ -294,18 +294,6 @@ func Test_getLatestVersion(t *testing.T) {
 			wantErr:  false,
 		},
 		{
-			name:     "Incorrect larger",
-			versions: []string{"7.0", "1.0.0"},
-			want:     "1.0.0",
-			wantErr:  false,
-		},
-		{
-			name:     "No version",
-			versions: []string{"7.0", "1.0"},
-			want:     "0.0.0",
-			wantErr:  true,
-		},
-		{
 			name:     "has Prerelease",
 			versions: []string{"7.0.0-alpha", "1.0.0"},
 			want:     "1.0.0",
@@ -326,11 +314,7 @@ func Test_getLatestVersion(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := getLatestVersion(tt.versions)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("getLatestVersion() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
+			got := getLatestVersion(tt.versions)
 			wantSemVer := semver.MustParse(tt.want)
 			if !reflect.DeepEqual(got, &wantSemVer) {
 				t.Errorf("getLatestVersion() got = %#v, want %#v", got, tt.want)
