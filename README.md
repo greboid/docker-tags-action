@@ -12,7 +12,7 @@ The latest tag will refer to the highest semver that has been tagged, including 
 ## Inputs
 
  - `repository` - Image name, if you don't want to use the git repository name
- - `registries` - A comma separated list of registry names to push to, defaults to docker hub
+ - `registries` - A comma separated list of registry names to prefix the tag with, defaults to docker hub
  - `separator` - Optional, the separator between tags, defaults to `,`
  - `fullname` - Should we include the registry/image in the tags, or just output versions.
 
