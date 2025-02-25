@@ -1,11 +1,12 @@
 module github.com/greboid/docker-tags-action
 
 go 1.21
+toolchain go1.23.6
 
 require (
 	github.com/blang/semver/v4 v4.0.0
 	github.com/google/go-github/v38 v38.1.0
-	golang.org/x/oauth2 v0.26.0
+	golang.org/x/oauth2 v0.27.0
 )
 
 require (
