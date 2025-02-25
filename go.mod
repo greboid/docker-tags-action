@@ -1,7 +1,8 @@
 module github.com/greboid/docker-tags-action
 
-go 1.21
-toolchain go1.23.6
+go 1.23.0
+
+toolchain go1.24.0
 
 require (
 	github.com/blang/semver/v4 v4.0.0
