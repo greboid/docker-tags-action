@@ -10,7 +10,7 @@ RUN set -eux; \
     mkdir /data; \
     touch --date=@0 /go/bin/app /notices /data
 
-FROM ghcr.io/greboid/dockerbase/nonroot:1.20250803.0
+FROM ghcr.io/greboid/dockerbase/nonroot:1.20251204.0
 LABEL org.opencontainers.image.source="https://github.com/greboid/docker-tags-action"
 COPY --from=build /notices /notices
 COPY --from=build /go/bin/app /docker-tags
