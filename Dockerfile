@@ -6,7 +6,8 @@ COPY . /app
 #Compile the app. Retrieves licenses, set timestamps on the outputs
 RUN set -eux; \
     CGO_ENABLED=0 GOOS=linux go build -trimpath -gcflags=./dontoptimizeme=-N -ldflags=-s -o /go/bin/app .; \
-    go run github.com/google/go-licenses@latest save ./... --save_path=/notices; \
+    mkdir /notices; \
+    go run github.com/Songmu/gocredits/cmd/gocredits@v1.1.0 . > /notices/CREDITS; \
     mkdir /data; \
     touch --date=@0 /go/bin/app /notices /data
 
